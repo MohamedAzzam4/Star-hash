@@ -74,6 +74,13 @@
             background-color: #fee2e2; /* Red for error */
             color: #991b1b;
         }
+        .game-mode-section {
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            background-color: #fcfcfc;
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
@@ -81,118 +88,101 @@
         <div class="game-card">
             <h1 class="text-3xl font-extrabold text-gray-800 mb-6">Digital Codebreaker</h1>
             <p class="text-gray-600 mb-8">
-                Try to guess the three-digit secret number (from 100 to 999).<br>
-                <span class="font-semibold text-green-600">Star (⭐)</span> = Correct digit in the correct position.<br>
-                <span class="font-semibold text-yellow-600">Hash (#)</span> = Correct digit in the wrong position.
+                A number guessing game with Stars (⭐) for correct digit/position and Hashes (#) for correct digit/wrong position.
             </p>
 
-            <div class="mb-6 input-group flex justify-center gap-4">
-                <input type="number" id="guessInput" min="100" max="999" class="p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition" placeholder="---" maxlength="3">
-            </div>
-
-            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-6">
-                <button id="guessButton" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-md">
-                    Guess
-                </button>
-                <button id="newGameButton" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-8 rounded-xl shadow-md">
-                    New Game
-                </button>
+            <!-- Mode Selection -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">Choose Mode:</label>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <label class="inline-flex items-center cursor-pointer p-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm hover:bg-blue-100 transition">
+                        <input type="radio" name="gameMode" value="user_guesses" class="form-radio text-blue-600 h-5 w-5" checked>
+                        <span class="ml-2 text-blue-800 font-medium">Player Guesses PC's Secret</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer p-3 bg-purple-50 border border-purple-200 rounded-lg shadow-sm hover:bg-purple-100 transition">
+                        <input type="radio" name="gameMode" value="pc_guesses" class="form-radio text-purple-600 h-5 w-5">
+                        <span class="ml-2 text-purple-800 font-medium">PC Guesses Player's Secret</span>
+                    </label>
+                </div>
             </div>
 
             <div id="messageBox" class="message-box hidden"></div>
 
-            <h2 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Guess History</h2>
-            <div id="history" class="bg-gray-50 p-4 rounded-xl max-h-60 overflow-y-auto border border-gray-200">
-                <!-- Guess history will be inserted here -->
-                <p id="noHistoryMessage" class="text-gray-500">No attempts yet. Start guessing!</p>
+            <!-- Player Guesses PC's Secret Mode -->
+            <div id="userGuessesMode" class="game-mode-section">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">You Guess the PC's Secret</h2>
+                <p class="text-gray-600 mb-8">
+                    Try to guess the three-digit secret number (from 100 to 999).
+                </p>
+
+                <div class="mb-6 input-group flex justify-center gap-4">
+                    <input type="number" id="guessInput" min="100" max="999" class="p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition" placeholder="---" maxlength="3">
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+                    <button id="guessButton" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-md">
+                        Guess
+                    </button>
+                    <button id="newUserGameButton" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-8 rounded-xl shadow-md">
+                        New Game
+                    </button>
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Your Guess History</h2>
+                <div id="history" class="bg-gray-50 p-4 rounded-xl max-h-60 overflow-y-auto border border-gray-200">
+                    <p id="noHistoryMessage" class="text-gray-500">No attempts yet. Start guessing!</p>
+                </div>
+            </div>
+
+            <!-- PC Guesses Player's Secret Mode -->
+            <div id="pcGuessesMode" class="game-mode-section hidden">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">PC Guesses Player's Secret</h2>
+                <p class="text-gray-600 mb-4">
+                    **Think of a 3-digit number (100-999) in your mind.** I will try to guess it!
+                    Provide feedback using '*' for correct digit in correct position and '#' for correct digit in wrong position.
+                    Leave blank or type 'no' if no digits are correct.
+                </p>
+
+                <div id="pcGuessDisplay" class="text-2xl font-bold text-blue-700 mb-6">
+                    PC's Guess: <span id="currentPcGuess">---</span>
+                </div>
+
+                <div id="feedbackSection" class="mt-4">
+                    <label for="feedbackInput" class="block text-gray-700 font-semibold mb-2">Your Feedback:</label>
+                    <input type="text" id="feedbackInput" class="p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500 transition w-full" placeholder="e.g., **, #, *#, no">
+                    <button id="submitFeedbackButton" class="btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-xl shadow-md mt-4">Submit Feedback</button>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+                    <button id="newPcGameButton" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-8 rounded-xl shadow-md">
+                        New PC Game
+                    </button>
+                </div>
+
+                <div id="pcGuessHistory" class="bg-gray-50 p-4 rounded-xl max-h-60 overflow-y-auto border border-gray-200 mt-8">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">PC's Guess History</h3>
+                    <p id="noPcHistoryMessage" class="text-gray-500">No guesses yet. Let the PC start!</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables for game state
-        let secretCombination; // Now stores a single 3-digit number (e.g., 543)
-        let attempts = 0;      // Counter for the number of attempts
-
-        // Get references to HTML elements
-        const guessInput = document.getElementById('guessInput'); // Single input field
-        const guessButton = document.getElementById('guessButton');
-        const newGameButton = document.getElementById('newGameButton');
-        const historyDiv = document.getElementById('history');
+        // --- Shared Elements and Functions ---
         const messageBox = document.getElementById('messageBox');
-        const noHistoryMessage = document.getElementById('noHistoryMessage');
 
-        /**
-         * Generates a random three-digit number between 100 and 999.
-         * @returns {number} A random three-digit number.
-         */
-        function generateSecretCombination() {
-            return Math.floor(Math.random() * (999 - 100 + 1)) + 100;
-        }
-
-        /**
-         * Checks the user's guess against the secret combination for stars and hashes.
-         * Star (⭐): Correct digit in the correct position.
-         * Hash (#): Correct digit in the wrong position.
-         * @param {number} secretNum - The secret three-digit number.
-         * @param {number} guessNum - The guessed three-digit number.
-         * @returns {{stars: number, hashes: number}} An object containing the counts.
-         */
-        function checkGuess(secretNum, guessNum) {
-            let stars = 0;
-            let hashes = 0;
-
-            // Convert numbers to arrays of digits (as strings for easy comparison)
-            const secretDigits = String(secretNum).split('');
-            const guessDigits = String(guessNum).split('');
-
-            // Create mutable copies for processing
-            const secretCopy = [...secretDigits];
-            const guessCopy = [...guessDigits];
-
-            // First pass: Check for stars (correct digit and position)
-            for (let i = 0; i < 3; i++) {
-                if (guessCopy[i] !== null && guessCopy[i] === secretCopy[i]) {
-                    stars++;
-                    // Mark as 'used' to prevent double counting for hashes
-                    secretCopy[i] = null;
-                    guessCopy[i] = null;
-                }
-            }
-
-            // Second pass: Check for hashes (correct digit, wrong position)
-            for (let i = 0; i < 3; i++) {
-                if (guessCopy[i] !== null) { // Only check if not already a star
-                    const secretIndex = secretCopy.indexOf(guessCopy[i]);
-                    if (secretIndex !== -1) {
-                        hashes++;
-                        secretCopy[secretIndex] = null; // Mark as 'used'
-                    }
-                }
-            }
-            return { stars, hashes };
-        }
-
-        /**
-         * Displays a message to the user in the message box.
-         * @param {string} message - The message to display.
-         * @param {string} type - 'success' or 'error' to apply appropriate styling.
-         */
         function displayMessage(message, type) {
             messageBox.textContent = message;
-            messageBox.classList.remove('hidden', 'message-success', 'message-error');
+            messageBox.classList.remove('hidden', 'message-success', 'message-error', 'bg-blue-100', 'text-blue-800');
             if (type === 'success') {
                 messageBox.classList.add('message-success');
             } else if (type === 'error') {
                 messageBox.classList.add('message-error');
-            } else {
-                messageBox.classList.add('bg-blue-100', 'text-blue-800'); // Default info style
+            } else { // Default info style
+                messageBox.classList.add('bg-blue-100', 'text-blue-800');
             }
         }
 
-        /**
-         * Clears the message box.
-         */
         function clearMessage() {
             messageBox.classList.add('hidden');
             messageBox.textContent = '';
@@ -200,98 +190,370 @@
         }
 
         /**
-         * Appends a guess and its result to the history display.
-         * @param {number} guessNum - The guessed number.
-         * @param {number} stars - The number of stars.
-         * @param {number} hashes - The number of hashes.
+         * Calculates the feedback ('*' or '#') for a given guess against a potential secret number.
+         * Takes string representations of numbers (e.g., "123", "456").
          */
-        function displayGuessHistory(guessNum, stars, hashes) {
-            if (noHistoryMessage) {
-                noHistoryMessage.classList.add('hidden'); // Hide "No history" message
+        function getFeedbackForFilterJS(potentialSecretStr, currentGuessStr) {
+            let stars = 0;
+            let hashes = 0;
+
+            const secretCounts = {};
+            for (const char of potentialSecretStr) {
+                secretCounts[char] = (secretCounts[char] || 0) + 1;
             }
 
-            const guessText = String(guessNum); // Convert number back to string for display
-            let feedback = '';
-            for (let i = 0; i < stars; i++) feedback += '⭐'; // Using emoji for stars
-            for (let i = 0; i < hashes; i++) feedback += ' #'; // Using # for hashes
+            const guessCounts = {};
+            for (const char of currentGuessStr) {
+                guessCounts[char] = (guessCounts[char] || 0) + 1;
+            }
+
+            // Calculate stars for correct digit in correct position
+            for (let i = 0; i < 3; i++) {
+                if (potentialSecretStr[i] === currentGuessStr[i]) {
+                    stars++;
+                }
+            }
+
+            // Calculate total common digits
+            let commonDigits = 0;
+            for (const digit in secretCounts) {
+                if (guessCounts[digit]) {
+                    commonDigits += Math.min(secretCounts[digit], guessCounts[digit]);
+                }
+            }
+
+            // Hashes are the common digits that are not stars
+            hashes = commonDigits - stars;
+
+            if (stars === 0 && hashes === 0) {
+                return "no match";
+            }
+
+            // Sort feedback for consistent comparison (e.g., "*#" instead of "#*")
+            const feedbackArr = [];
+            for (let i = 0; i < stars; i++) feedbackArr.push('*');
+            for (let i = 0; i < hashes; i++) feedbackArr.push('#');
+            return feedbackArr.sort().join('');
+        }
+
+        // --- Player Guesses PC's Secret Mode (Original Game) ---
+        let userGameSecretNumbers = [];
+        let userGameAttempts = 0;
+
+        const guessInput = document.getElementById('guessInput');
+        const guessButton = document.getElementById('guessButton');
+        const newUserGameButton = document.getElementById('newUserGameButton');
+        const historyDiv = document.getElementById('history');
+        const noHistoryMessage = document.getElementById('noHistoryMessage');
+
+        function generateUserGameSecretNumbers() {
+            return Math.floor(Math.random() * (999 - 100 + 1)) + 100;
+        }
+
+        function checkUserGameGuess(secretNum, guessNum) {
+            return getFeedbackForFilterJS(String(secretNum), String(guessNum));
+        }
+
+        /**
+         * Displays user's guess and PC's feedback in history.
+         * @param {number} guessNum - The guessed number.
+         * @param {string} feedback - The raw feedback string (e.g., "***", "*#", "no match").
+         * @param {number} attempt - The attempt number.
+         */
+        function displayUserGuessHistory(guessNum, feedback, attempt) {
+            if (noHistoryMessage) {
+                noHistoryMessage.classList.add('hidden');
+            }
+
+            const guessText = String(guessNum);
+            let feedbackDisplay = '';
+            if (feedback === 'no match') {
+                feedbackDisplay = 'No match';
+            } else {
+                for (const char of feedback) {
+                    if (char === '*') {
+                        feedbackDisplay += '⭐';
+                    } else if (char === '#') {
+                        feedbackDisplay += '#';
+                    }
+                }
+            }
 
             const historyItem = document.createElement('div');
             historyItem.classList.add('history-item', 'text-gray-700', 'font-medium');
             historyItem.innerHTML = `
-                <span>Attempt ${attempts}: <strong>${guessText}</strong></span>
-                <span>${feedback || 'No match'}</span>
+                <span>Attempt ${attempt}: <strong>${guessText}</strong></span>
+                <span>Feedback: ${feedbackDisplay}</span>
             `;
-            historyDiv.prepend(historyItem); // Add to top of history
-            historyDiv.scrollTop = 0; // Scroll to top to show latest guess
+            historyDiv.prepend(historyItem);
+            historyDiv.scrollTop = 0;
         }
 
-        /**
-         * Starts a new game: generates secret numbers, resets attempts, clears history and messages.
-         */
-        function startGame() {
-            secretCombination = generateSecretCombination();
-            attempts = 0;
+        function startUserGame() {
+            userGameSecretNumbers = generateUserGameSecretNumbers();
+            userGameAttempts = 0;
             historyDiv.innerHTML = '<p id="noHistoryMessage" class="text-gray-500">No attempts yet. Start guessing!</p>';
             clearMessage();
-            guessInput.value = ''; // Clear input field
-            guessInput.disabled = false; // Enable input
-            guessInput.focus(); // Focus on the input
-            guessButton.disabled = false; // Enable guess button
-            // console.log("Secret combination for debug (remove in production):", secretCombination); // For debugging, shows the secret
+            guessInput.value = '';
+            guessInput.disabled = false;
+            guessInput.focus();
+            guessButton.disabled = false;
+            // console.log("User Game Secret for debug (remove in production):", userGameSecretNumbers);
         }
 
-        /**
-         * Handles the user's guess submission.
-         */
-        function handleGuess() {
-            clearMessage(); // Clear previous messages
+        function handleUserGuess() {
+            clearMessage();
 
             const guessValue = guessInput.value;
             const guessNum = parseInt(guessValue);
 
-            // Validation: check if it's a 3-digit number between 100 and 999
             if (isNaN(guessNum) || guessValue.length !== 3 || guessNum < 100 || guessNum > 999) {
                 displayMessage('Please enter a valid three-digit number (100-999).', 'error');
                 return;
             }
 
-            attempts++; // Increment attempt counter
+            userGameAttempts++;
+            const feedback = checkUserGameGuess(userGameSecretNumbers, guessNum);
+            displayUserGuessHistory(guessNum, feedback, userGameAttempts);
 
-            const { stars, hashes } = checkGuess(secretCombination, guessNum);
-
-            displayGuessHistory(guessNum, stars, hashes);
-
-            // Clear input field after guess
             guessInput.value = '';
-            guessInput.focus(); // Focus on the input for next guess
+            guessInput.focus();
 
-            if (stars === 3) { // 3 stars means all digits are correct and in correct positions
-                displayMessage(`Congratulations! You've won in ${attempts} attempts! The secret number was ${secretCombination}.`, 'success');
-                guessInput.disabled = true; // Disable input
-                guessButton.disabled = true; // Disable guess button
-            } else {
-                // Optional: Check for max attempts
-                // if (MAX_ATTEMPTS && attempts >= MAX_ATTEMPTS) {
-                //     displayMessage(`Out of attempts! The secret number was ${secretCombination}.`, 'error');
-                //     guessInput.disabled = true;
-                //     guessButton.disabled = true;
-                // }
+            if (feedback === "***") {
+                displayMessage(`Congratulations! You've won in ${userGameAttempts} attempts! The secret number was ${userGameSecretNumbers}. 🎉`, 'success');
+                guessInput.disabled = true;
+                guessButton.disabled = true;
             }
         }
 
-        // Event Listeners
-        guessButton.addEventListener('click', handleGuess);
-        newGameButton.addEventListener('click', startGame);
+        // --- PC Guesses Player's Secret Mode (New Game Logic) ---
+        let pcPossibilities = [];
+        let pcCurrentGuess = null;
+        let pcAttempts = 0;
+        let pcSolverState = 'initial'; // 'initial', 'guessing', 'finished'
+        const initialPcGuesses = ["123", "456", "789"]; // Smart initial strategy
+        let currentInitialPcGuessIndex = 0;
 
-        // Allow pressing Enter key to submit guess when input is focused
+        const gameModeRadios = document.querySelectorAll('input[name="gameMode"]');
+        const userGuessesModeDiv = document.getElementById('userGuessesMode');
+        const pcGuessesModeDiv = document.getElementById('pcGuessesMode');
+
+        const pcGuessDisplay = document.getElementById('pcGuessDisplay');
+        const currentPcGuessSpan = document.getElementById('currentPcGuess');
+        const feedbackSection = document.getElementById('feedbackSection');
+        const feedbackInput = document.getElementById('feedbackInput');
+        const submitFeedbackButton = document.getElementById('submitFeedbackButton');
+        const pcGuessHistoryDiv = document.getElementById('pcGuessHistory');
+        const noPcHistoryMessage = document.getElementById('noPcHistoryMessage');
+        const newPcGameButton = document.getElementById('newPcGameButton');
+
+        function initializePcSolver() {
+            pcPossibilities = [];
+            for (let i = 100; i <= 999; i++) {
+                pcPossibilities.push(String(i)); // Store numbers as strings for digit manipulation
+            }
+            pcAttempts = 0;
+            currentInitialPcGuessIndex = 0;
+            pcGuessHistoryDiv.innerHTML = '<h3 class="text-lg font-semibold text-gray-700 mb-2">PC\'s Guess History</h3><p id="noPcHistoryMessage" class="text-gray-500">No guesses yet. Let the PC start!</p>';
+            clearMessage();
+            pcSolverState = 'initial'; // Reset state
+            pcGuessDisplay.classList.remove('hidden'); // Show PC guess display
+            feedbackSection.classList.remove('hidden'); // Show feedback section
+            submitFeedbackButton.disabled = false; // Enable feedback button
+            feedbackInput.disabled = false; // Enable feedback input
+            displayMessage("PC: I'm ready! Think of a 3-digit number between 100 and 999. Tell me your feedback for my guesses.", 'info');
+
+            // Make the first guess immediately
+            makePcGuess();
+        }
+
+        function makePcGuess() {
+            if (pcPossibilities.length === 0) {
+                displayMessage("PC: Hmm, I couldn't find a number that matches your feedback. Please check your previous feedback for accuracy.", 'error');
+                pcSolverState = 'finished';
+                submitFeedbackButton.disabled = true;
+                feedbackInput.disabled = true;
+                return;
+            }
+
+            pcAttempts++;
+
+            if (pcPossibilities.length === 1) {
+                pcCurrentGuess = pcPossibilities[0];
+                displayPcGuessHistory(pcCurrentGuess, "***", pcAttempts); // Mark as final guess
+                displayMessage(`PC: I'm pretty sure your number is ${pcCurrentGuess}! Did I get it? 🎉`, 'success');
+                pcSolverState = 'finished';
+                submitFeedbackButton.disabled = true;
+                feedbackInput.disabled = true;
+                return;
+            }
+
+            let guessToMake;
+            if (currentInitialPcGuessIndex < initialPcGuesses.length) {
+                guessToMake = initialPcGuesses[currentInitialPcGuessIndex];
+                currentInitialPcGuessIndex++;
+            } else {
+                // Pick the first available number from the highly filtered list
+                // For a more advanced solver, this could be optimized (e.g., Minimax)
+                guessToMake = pcPossibilities[0];
+            }
+
+            pcCurrentGuess = guessToMake;
+            currentPcGuessSpan.textContent = pcCurrentGuess;
+            feedbackInput.value = ''; // Clear feedback input
+            feedbackInput.focus(); // Focus for user input
+        }
+
+        /**
+         * Displays PC's guess and user's feedback in history.
+         * @param {string} guess - The PC's guessed number as a string.
+         * @param {string} feedback - The raw feedback string (e.g., "***", "*#", "no match").
+         * @param {number} attempt - The attempt number.
+         */
+        function displayPcGuessHistory(guess, feedback, attempt) {
+            if (noPcHistoryMessage) {
+                noPcHistoryMessage.classList.add('hidden');
+            }
+            let feedbackDisplay = '';
+            if (feedback === 'no match') {
+                feedbackDisplay = 'No match';
+            } else {
+                for (const char of feedback) {
+                    if (char === '*') {
+                        feedbackDisplay += '⭐';
+                    } else if (char === '#') {
+                        feedbackDisplay += '#';
+                    }
+                }
+            }
+
+            const historyItem = document.createElement('div');
+            historyItem.classList.add('history-item', 'text-gray-700', 'font-medium');
+            historyItem.innerHTML = `
+                <span>PC Attempt ${attempt}: <strong>${guess}</strong></span>
+                <span>Your Feedback: ${feedbackDisplay}</span>
+            `;
+            pcGuessHistoryDiv.prepend(historyItem);
+            pcGuessHistoryDiv.scrollTop = 0;
+        }
+
+        function handlePcFeedbackSubmission() {
+            clearMessage();
+            if (pcSolverState === 'finished') return;
+
+            const rawFeedback = feedbackInput.value.trim().toLowerCase();
+            let normalizedFeedback;
+
+            if (rawFeedback === "" || rawFeedback === "no" || rawFeedback === "none" || rawFeedback === "0") {
+                normalizedFeedback = "no match";
+            } else {
+                // Allow stars, hashes, and letters (for 'no')
+                // Filter out anything else, then sort the * and # parts
+                const cleanedFeedback = rawFeedback.replace(/[^*.#a-z\s]/g, ''); // Allow letters, spaces, *, #, .
+                if (cleanedFeedback.includes('no') || cleanedFeedback.includes('none')) {
+                    normalizedFeedback = "no match"; // Explicitly handle 'no' or 'none' as 'no match'
+                } else {
+                    // If not 'no match', then it must be stars/hashes, so sort them
+                    normalizedFeedback = Array.from(cleanedFeedback.replace(/\s/g, '')).sort().join('');
+                }
+            }
+
+            // Basic validation for user feedback format (optional but good for usability)
+            if (normalizedFeedback !== "no match" && (normalizedFeedback.length > 3)) { // Max 3 symbols (***, ##*, etc.)
+                 displayMessage("Please enter valid feedback (e.g., *, #, **, *#, ***, or 'no'). Max 3 symbols.", 'error');
+                 return;
+            }
+
+            if (normalizedFeedback === "***") {
+                displayPcGuessHistory(pcCurrentGuess, normalizedFeedback, pcAttempts);
+                displayMessage(`PC: Yes! I guessed your number ${pcCurrentGuess} in ${pcAttempts} attempts! 🎉`, 'success');
+                pcSolverState = 'finished';
+                submitFeedbackButton.disabled = true;
+                feedbackInput.disabled = true;
+                return;
+            }
+
+            // Filter possibilities based on the feedback
+            const filteredPossibilities = pcPossibilities.filter(num => {
+                return getFeedbackForFilterJS(num, pcCurrentGuess) === normalizedFeedback;
+            });
+
+            pcPossibilities = filteredPossibilities;
+            displayPcGuessHistory(pcCurrentGuess, normalizedFeedback, pcAttempts); // Update history with feedback
+
+            if (pcPossibilities.length === 0) {
+                displayMessage("PC: Hmm, it seems there are no numbers that match your feedback. This usually means there was an error in the feedback you provided. Please start a new game.", 'error');
+                pcSolverState = 'finished';
+                submitFeedbackButton.disabled = true;
+                feedbackInput.disabled = true;
+                return;
+            }
+
+            if (pcPossibilities.length === 1) {
+                pcCurrentGuess = pcPossibilities[0];
+                displayPcGuessHistory(pcCurrentGuess, "***", pcAttempts + 1); // Mark as final guess for history
+                displayMessage(`PC: I'm pretty sure your number is ${pcCurrentGuess}! Did I get it? 🎉`, 'success');
+                pcSolverState = 'finished';
+                submitFeedbackButton.disabled = true;
+                feedbackInput.disabled = true;
+                return;
+            }
+
+            // If not solved, make the next guess
+            makePcGuess();
+        }
+
+
+        // --- Event Listeners and Initial Setup ---
+
+        // Event listener for mode selection
+        gameModeRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                if (event.target.value === 'user_guesses') {
+                    userGuessesModeDiv.classList.remove('hidden');
+                    pcGuessesModeDiv.classList.add('hidden');
+                    startUserGame(); // Restart user guessing game
+                } else { // pc_guesses
+                    userGuessesModeDiv.classList.add('hidden');
+                    pcGuessesModeDiv.classList.remove('hidden');
+                    initializePcSolver(); // Prepare PC solver
+                }
+            });
+        });
+
+        // Player Guesses PC's Secret Mode Listeners
+        guessButton.addEventListener('click', handleUserGuess);
+        newUserGameButton.addEventListener('click', startUserGame);
         guessInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
-                handleGuess();
+                handleUserGuess();
+            }
+        });
+        // Ensure single digit input for user guess mode
+        guessInput.addEventListener('input', (event) => {
+            if (event.target.value.length > 3) {
+                event.target.value = event.target.value.slice(0, 3);
             }
         });
 
-        // Initialize the game when the page loads
-        window.onload = startGame;
+        // PC Guesses Player's Secret Mode Listeners
+        submitFeedbackButton.addEventListener('click', handlePcFeedbackSubmission);
+        feedbackInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                handlePcFeedbackSubmission();
+            }
+        });
+        // Filter input to allow stars, hashes, letters, and spaces for feedback
+        feedbackInput.addEventListener('input', (event) => {
+            // This regex now allows alphanumeric characters, spaces, *, #
+            // It will also prevent certain combinations of symbols if needed, but primarily allows entry
+            event.target.value = event.target.value.replace(/[^a-zA-Z*.#\s]/g, '');
+        });
+        newPcGameButton.addEventListener('click', initializePcSolver);
+
+
+        // Initialize the game when the page loads (default to user guesses mode)
+        window.onload = startUserGame; // Start user game mode by default
     </script>
 </body>
 </html>
